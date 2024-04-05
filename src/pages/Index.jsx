@@ -18,99 +18,62 @@ const Index = () => {
   const bgColor = useColorModeValue("gray.100", "gray.900");
   const color = useColorModeValue("gray.800", "white");
 
+  const itemsData = [
+    {
+      id: 1,
+      title: "Item 1",
+      description: "Description of Item 1",
+      price: 10.99,
+      image: "https://via.placeholder.com/150",
+    },
+    {
+      id: 2,
+      title: "Item 2",
+      description: "Description of Item 2",
+      price: 19.99,
+      image: "https://via.placeholder.com/150",
+    },
+  ];
+
+  const userData = {
+    name: "John Doe",
+    email: "john@example.com",
+    items: [
+      {
+        id: 3,
+        title: "User Item 1",
+        price: 5.99,
+      },
+    ],
+    purchased: [
+      {
+        id: 4,
+        title: "Purchased Item 1",
+        price: 8.99,
+      },
+    ],
+  };
+
   useEffect(() => {
-    // Fetch items for sale
-    fetch(`${API_URL}/items`)
-      .then((res) => res.json())
-      .then((data) => setItems(data));
-
-    // Check if user is logged in
-    const token = localStorage.getItem("token");
-    if (token) {
-      setIsLoggedIn(true);
-      // Fetch user data
-      fetch(`${API_URL}/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setUser(data);
-          setMyItems(data.items);
-          setPurchasedItems(data.purchased);
-        });
-    }
+    setItems(itemsData);
+    setIsLoggedIn(true);
+    setUser(userData);
+    setMyItems(userData.items);
+    setPurchasedItems(userData.purchased);
   }, []);
-
-  const handleLogin = async (username, password) => {
-    try {
-      const res = await fetch(`${API_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem("token", data.token);
-        setIsLoggedIn(true);
-      } else {
-        alert("Invalid credentials");
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleRegistration = async (userData) => {
-    try {
-      const res = await fetch(`${API_URL}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem("token", data.token);
-        setIsLoggedIn(true);
-      } else {
-        alert("Registration failed");
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleLogout = () => {
-    // TODO: Implement logout
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    setUser(null);
-  };
 
   const handleSearch = (e) => {
     e.preventDefault();
     // TODO: Implement search
   };
 
-  const handlePurchase = async (itemId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/purchase/${itemId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (res.ok) {
-        alert("Purchase successful!");
-
-        const data = await res.json();
-        setPurchasedItems(data.purchased);
-      } else {
-        alert("Purchase failed");
-      }
-    } catch (err) {
-      console.error(err);
+  const handlePurchase = (itemId) => {
+    const purchasedItem = items.find((item) => item.id === itemId);
+    if (purchasedItem) {
+      setPurchasedItems([...purchasedItems, purchasedItem]);
+      alert("Purchase successful!");
+    } else {
+      alert("Purchase failed");
     }
   };
 
@@ -127,14 +90,9 @@ const Index = () => {
           {isLoggedIn ? (
             <>
               <Text mr={4}>Welcome, {user.name}</Text>
-              <Button onClick={handleLogout}>Logout</Button>
+              <Button onClick={() => setIsLoggedIn(false)}>Logout</Button>
             </>
-          ) : (
-            <>
-              <Login onLogin={handleLogin} mr={4} />
-              <Registration onRegistration={handleRegistration} />
-            </>
-          )}
+          ) : null}
           <Button ml={4} onClick={toggleColorMode}>
             {useColorModeValue(<FaMoon />, <FaSun />)}
           </Button>
