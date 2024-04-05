@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Box, Flex, Heading, Text, Button, Input, Select, Image, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, Button, Input, Select, Image, useColorMode, useColorModeValue, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, FormControl, FormLabel } from "@chakra-ui/react";
 import { FaPlus, FaMoon, FaSun, FaSearch } from "react-icons/fa";
+import Login from "../components/Login";
+import Registration from "../components/Registration";
 
 const API_URL = "https://api.example.com"; // TODO: Replace with your API url
 
@@ -39,10 +41,42 @@ const Index = () => {
     }
   }, []);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // TODO: Implement login
-    setIsLoggedIn(true);
+  const handleLogin = async (username, password) => {
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+        setIsLoggedIn(true);
+      } else {
+        alert("Invalid credentials");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleRegistration = async (userData) => {
+    try {
+      const res = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+        setIsLoggedIn(true);
+      } else {
+        alert("Registration failed");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleLogout = () => {
@@ -57,8 +91,27 @@ const Index = () => {
     // TODO: Implement search
   };
 
-  const handlePurchase = (itemId) => {
-    // TODO: Implement purchase
+  const handlePurchase = async (itemId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/purchase/${itemId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.ok) {
+        alert("Purchase successful!");
+
+        const data = await res.json();
+        setPurchasedItems(data.purchased);
+      } else {
+        alert("Purchase failed");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleNewListing = (e) => {
@@ -70,14 +123,17 @@ const Index = () => {
     <Box bg={bgColor} minH="100vh" py={10}>
       <Flex justify="space-between" align="center" mb={8} px={4}>
         <Heading size="xl">Marketplace</Heading>
-        <Flex>
+        <Flex align="center">
           {isLoggedIn ? (
             <>
               <Text mr={4}>Welcome, {user.name}</Text>
               <Button onClick={handleLogout}>Logout</Button>
             </>
           ) : (
-            <Button onClick={handleLogin}>Login</Button>
+            <>
+              <Login onLogin={handleLogin} mr={4} />
+              <Registration onRegistration={handleRegistration} />
+            </>
           )}
           <Button ml={4} onClick={toggleColorMode}>
             {useColorModeValue(<FaMoon />, <FaSun />)}
