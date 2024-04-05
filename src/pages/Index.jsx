@@ -67,14 +67,29 @@ const Index = () => {
     // TODO: Implement search
   };
 
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
   const handlePurchase = (itemId) => {
     const purchasedItem = items.find((item) => item.id === itemId);
     if (purchasedItem) {
-      setPurchasedItems([...purchasedItems, purchasedItem]);
-      alert("Purchase successful!");
+      setSelectedItem(purchasedItem);
+      setIsPurchaseModalOpen(true);
     } else {
       alert("Purchase failed");
     }
+  };
+
+  const handlePurchaseSubmit = (e) => {
+    e.preventDefault();
+
+    setPurchasedItems([...purchasedItems, selectedItem]);
+    setIsPurchaseModalOpen(false);
+    alert("Purchase successful!");
+  };
+
+  const closePurchaseModal = () => {
+    setIsPurchaseModalOpen(false);
   };
 
   const [isNewListingOpen, setIsNewListingOpen] = useState(false);
@@ -98,7 +113,12 @@ const Index = () => {
               <Text mr={4}>Welcome, {user.name}</Text>
               <Button onClick={() => setIsLoggedIn(false)}>Logout</Button>
             </>
-          ) : null}
+          ) : (
+            <>
+              <Login onLogin={() => setIsLoggedIn(true)} />
+              <Registration onRegistration={() => setIsLoggedIn(true)} />
+            </>
+          )}
           <Button ml={4} onClick={toggleColorMode}>
             {useColorModeValue(<FaMoon />, <FaSun />)}
           </Button>
@@ -202,8 +222,33 @@ const Index = () => {
         <ModalContent>
           <ModalHeader>New Listing</ModalHeader>
           <ModalCloseButton />
+          <ModalBody>{}</ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isPurchaseModalOpen} onClose={closePurchaseModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Purchase Item</ModalHeader>
+          <ModalCloseButton />
           <ModalBody>
-            {}
+            <form onSubmit={handlePurchaseSubmit}>
+              <FormControl mb={4}>
+                <FormLabel>Credit Card Number</FormLabel>
+                <Input type="text" />
+              </FormControl>
+              <FormControl mb={4}>
+                <FormLabel>Expiration Date</FormLabel>
+                <Input type="text" />
+              </FormControl>
+              <FormControl mb={4}>
+                <FormLabel>CVV</FormLabel>
+                <Input type="text" />
+              </FormControl>
+              <Button type="submit" colorScheme="blue">
+                Complete Purchase
+              </Button>
+            </form>
           </ModalBody>
         </ModalContent>
       </Modal>
