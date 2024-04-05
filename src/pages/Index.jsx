@@ -77,9 +77,15 @@ const Index = () => {
     }
   };
 
+  const [isNewListingOpen, setIsNewListingOpen] = useState(false);
+
   const handleNewListing = (e) => {
     e.preventDefault();
-    // TODO: Implement new listing
+    setIsNewListingOpen(true);
+  };
+
+  const closeNewListing = () => {
+    setIsNewListingOpen(false);
   };
 
   return (
@@ -120,7 +126,7 @@ const Index = () => {
           <Flex wrap="wrap">
             {items.map((item) => (
               <Box key={item.id} width={["100%", "50%", "33%"]} p={4}>
-                <Box borderWidth={1} borderRadius="lg" p={4}>
+                <Box borderWidth={1} borderRadius="lg" borderColor="gray.300" p={4}>
                   <Image src={item.image} alt={item.title} mb={2} borderRadius="lg" />
                   <Heading size="md" mb={2}>
                     {item.title}
@@ -129,7 +135,7 @@ const Index = () => {
                   <Text fontWeight="bold" mb={4}>
                     ${item.price}
                   </Text>
-                  <Button colorScheme="green" onClick={() => handlePurchase(item.id)}>
+                  <Button colorScheme="green" borderColor="green.500" onClick={() => handlePurchase(item.id)}>
                     Buy Now
                   </Button>
                 </Box>
@@ -169,7 +175,7 @@ const Index = () => {
               ))}
               <form onSubmit={handleNewListing}>
                 {/* TODO: Add new listing form fields */}
-                <Button type="submit" colorScheme="blue" leftIcon={<FaPlus />}>
+                <Button type="submit" colorScheme="blue" borderColor="blue.500" leftIcon={<FaPlus />} onClick={handleNewListing}>
                   New Listing
                 </Button>
               </form>
@@ -190,6 +196,17 @@ const Index = () => {
           </Box>
         )}
       </Flex>
+
+      <Modal isOpen={isNewListingOpen} onClose={closeNewListing}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>New Listing</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
